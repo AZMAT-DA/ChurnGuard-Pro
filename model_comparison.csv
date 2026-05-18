@@ -1,0 +1,5 @@
+Model,Accuracy,Precision,Recall,F1-Score,AUC
+Logistic Regression,73.6,50.2,78.9,61.3,84.0
+Random Forest,77.0,55.2,70.9,62.1,84.0
+XGBoost Tuned,77.6,57.3,61.0,59.1,83.5
+Neural Network,75.1,52.2,74.3,61.3,82.4
