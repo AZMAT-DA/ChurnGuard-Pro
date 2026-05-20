@@ -1,0 +1,3 @@
+Date,Time,Tenure,Monthly,Contract,Internet,Churn_Probability,Prediction,Risk_Level
+2026-05-20,10:19,12 months,$65,Month-to-month,DSL,33.63%,STAY,Low
+2026-05-20,10:46,12 months,$65,Month-to-month,DSL,35.36%,STAY,Low Risk
