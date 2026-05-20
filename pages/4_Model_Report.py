@@ -40,7 +40,7 @@ st.divider()
 st.subheader("All Models Comparison")
 st.dataframe(
     df.style.highlight_max(
-        subset=['Accuracy','Precision','Recall','F1-Score','AUC'],
+        subset=['Accuracy', 'Precision', 'Recall', 'F1-Score', 'AUC'],
         color='#C0DD97'
     ),
     use_container_width=True
@@ -54,16 +54,15 @@ st.subheader("Visual Comparison")
 col1, col2 = st.columns(2)
 
 with col1:
-    # AUC bar chart
     fig, ax = plt.subplots(figsize=(5, 4))
-    colors  = ['#3B82F6','#8B5CF6','#10B981','#F59E0B'][:len(df)]
+    colors  = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'][:len(df)]
     bars    = ax.bar(df['Model'], df['AUC'], color=colors, alpha=0.85)
     ax.set_title('AUC Score by Model', fontweight='bold')
     ax.set_ylabel('AUC (%)')
     ax.set_ylim(70, 90)
     for bar in bars:
         h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.1,
+        ax.text(bar.get_x() + bar.get_width() / 2, h + 0.1,
                 f'{h}%', ha='center', fontsize=9, fontweight='bold')
     ax.tick_params(axis='x', labelsize=8, rotation=10)
     plt.tight_layout()
@@ -71,7 +70,6 @@ with col1:
     plt.close()
 
 with col2:
-    # Recall bar chart
     fig, ax = plt.subplots(figsize=(5, 4))
     bars    = ax.bar(df['Model'], df['Recall'], color=colors, alpha=0.85)
     ax.set_title('Recall Score by Model', fontweight='bold')
@@ -79,7 +77,7 @@ with col2:
     ax.set_ylim(0, 100)
     for bar in bars:
         h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.5,
+        ax.text(bar.get_x() + bar.get_width() / 2, h + 0.5,
                 f'{h}%', ha='center', fontsize=9, fontweight='bold')
     ax.tick_params(axis='x', labelsize=8, rotation=10)
     plt.tight_layout()
@@ -88,27 +86,30 @@ with col2:
 
 st.divider()
 
-# ---- Model charts if available ----
+# ---- Generated charts from training ----
 st.subheader("Generated Charts from Training")
+
 col1, col2 = st.columns(2)
 
 with col1:
     try:
         st.image('model_comparison_chart.png',
-                 caption='Model comparison chart', use_column_width=True)
+                 caption='Model comparison chart',
+                 use_container_width=True)
     except:
         st.info("Run visualize_results.py to generate this chart.")
 
 with col2:
     try:
         st.image('feature_importance.png',
-                 caption='Feature importance', use_column_width=True)
+                 caption='Feature importance',
+                 use_container_width=True)
     except:
         st.info("Run visualize_results.py to generate this chart.")
 
 try:
     st.image('neural_network_training.png',
              caption='Neural Network training loss curve',
-             use_column_width=True)
+             use_container_width=True)
 except:
     pass
