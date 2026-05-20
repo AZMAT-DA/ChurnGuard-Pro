@@ -8,3 +8,5 @@ xgboost
 imbalanced-learn
 joblib
 torch
+reportlab==4.0.9
+pillow
