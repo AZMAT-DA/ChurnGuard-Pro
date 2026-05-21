@@ -1,0 +1,4 @@
+users.db
+prediction_history.csv
+__pycache__/
+*.pyc

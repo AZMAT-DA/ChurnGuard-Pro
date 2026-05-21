@@ -1,98 +1,83 @@
-# pages/5_History.py — Prediction history tracker
+# pages/5_History.py — User's personal prediction history
 
 import streamlit as st
 import pandas as pd
-import os
+from database import get_user_predictions
 
-st.set_page_config(page_title="History", layout="wide")
+st.set_page_config(page_title="My History", layout="wide")
 
 if 'logged_in' not in st.session_state or not st.session_state.logged_in:
     st.warning("Please login first.")
     st.page_link("app.py", label="Go to Login page")
     st.stop()
 
-st.title("Prediction History")
-st.write("All predictions made through the Predict Single page are logged here.")
+st.title("My Prediction History")
+st.write(f"All predictions made by {st.session_state.full_name}")
 st.divider()
 
-history_file = 'prediction_history.csv'
+predictions = get_user_predictions(st.session_state.user_id)
 
-if not os.path.exists(history_file):
-    st.info("No predictions made yet. Go to Predict Single and make "
-            "your first prediction — it will appear here automatically.")
+if not predictions:
+    st.info(
+        "You have not made any predictions yet. "
+        "Go to Predict Single and make your first prediction!"
+    )
     st.stop()
 
-# Load history
-df = pd.read_csv(history_file)
+df = pd.DataFrame(predictions)
 
-if df.empty:
-    st.info("History file is empty. Make a prediction first.")
-    st.stop()
+# ---- Summary ----
+st.subheader("Your Summary")
 
-# ---- Summary metrics ----
-st.subheader("Summary")
-
-total      = len(df)
-churned    = len(df[df['Prediction'] == 'CHURN'])
-stayed     = len(df[df['Prediction'] == 'STAY'])
-high_risk  = len(df[df['Risk_Level'] == 'High Risk']) if 'Risk_Level' in df.columns else 0
+total   = len(df)
+churned = len(df[df['prediction'] == 'CHURN'])
+stayed  = len(df[df['prediction'] == 'STAY'])
+high    = len(df[df['risk_level'] == 'High Risk']) if 'risk_level' in df.columns else 0
 
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Total predictions",  total)
-c2.metric("Predicted churn",    churned)
-c3.metric("Predicted stay",     stayed)
-c4.metric("High risk flagged",  high_risk)
+c1.metric("Total predictions", total)
+c2.metric("Churn predicted",   churned)
+c3.metric("Stay predicted",    stayed)
+c4.metric("High risk",         high)
 
 st.divider()
 
-# ---- Filter options ----
-st.subheader("Filter History")
+# ---- Filter ----
+st.subheader("Filter")
 
 col1, col2 = st.columns(2)
 with col1:
     pred_filter = st.selectbox(
-        "Filter by prediction",
-        ["All", "CHURN", "STAY"]
+        "Filter by prediction", ["All", "CHURN", "STAY"]
     )
 with col2:
-    if 'Risk_Level' in df.columns:
-        risk_filter = st.selectbox(
-            "Filter by risk level",
-            ["All", "High Risk", "Medium Risk", "Low Risk"]
-        )
-    else:
-        risk_filter = "All"
+    risk_filter = st.selectbox(
+        "Filter by risk", ["All", "High Risk", "Medium Risk", "Low Risk"]
+    )
 
-# Apply filters
 filtered = df.copy()
 if pred_filter != "All":
-    filtered = filtered[filtered['Prediction'] == pred_filter]
-if risk_filter != "All" and 'Risk_Level' in filtered.columns:
-    filtered = filtered[filtered['Risk_Level'] == risk_filter]
+    filtered = filtered[filtered['prediction'] == pred_filter]
+if risk_filter != "All" and 'risk_level' in filtered.columns:
+    filtered = filtered[filtered['risk_level'] == risk_filter]
+
+# Show clean columns only
+show_cols = ['date', 'time', 'tenure', 'monthly_charges',
+             'contract', 'internet', 'churn_probability',
+             'prediction', 'risk_level']
+show_cols = [c for c in show_cols if c in filtered.columns]
 
 st.write(f"Showing {len(filtered)} of {total} predictions")
-
-# ---- History table ----
-st.subheader("Prediction Log")
-st.dataframe(filtered, use_container_width=True)
+st.dataframe(filtered[show_cols], use_container_width=True)
 
 st.divider()
 
-# ---- Download history ----
-col1, col2 = st.columns(2)
-
-with col1:
-    csv_data = filtered.to_csv(index=False)
-    st.download_button(
-        label="Download filtered history as CSV",
-        data=csv_data,
-        file_name="prediction_history_export.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
-
-with col2:
-    if st.button("Clear all history", use_container_width=True):
-        os.remove(history_file)
-        st.success("History cleared.")
-        st.rerun()
+# ---- Download ----
+csv = filtered[show_cols].to_csv(index=False)
+st.download_button(
+    "Download my history as CSV",
+    data=csv,
+    file_name="my_prediction_history.csv",
+    mime="text/csv",
+    use_container_width=True
+)

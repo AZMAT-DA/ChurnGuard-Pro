@@ -1,12 +1,10 @@
-# pages/2_Predict_Single.py — Single prediction with PDF + recommendations
+# pages/2_Predict_Single.py — Single prediction with PDF + recommendations + database
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
 import datetime
-import csv
-import os
 
 st.set_page_config(page_title="Predict Single", layout="wide")
 
@@ -27,7 +25,8 @@ except Exception as e:
 # Load helper modules
 try:
     from recommendations import get_recommendations, get_risk_label
-    from pdf_report import generate_churn_report
+    from pdf_report       import generate_churn_report
+    from database         import save_prediction
     modules_loaded = True
 except Exception as e:
     st.warning(f"Helper modules not loaded: {e}")
@@ -65,8 +64,8 @@ with col2:
         "Electronic check", "Mailed check",
         "Bank transfer (automatic)", "Credit card (automatic)"
     ])
-    monthly   = st.slider("Monthly charges ($)", 18, 120, 65)
-    total     = monthly * tenure
+    monthly = st.slider("Monthly charges ($)", 18, 120, 65)
+    total   = monthly * tenure
 
 st.divider()
 
@@ -77,7 +76,7 @@ def build_input():
         columns=feature_names
     )
     num_scaled = scaler.transform([[tenure, monthly, total]])[0]
-    for col, val in zip(['tenure','MonthlyCharges','TotalCharges'], num_scaled):
+    for col, val in zip(['tenure', 'MonthlyCharges', 'TotalCharges'], num_scaled):
         if col in row.columns:
             row[col] = val
 
@@ -88,20 +87,20 @@ def build_input():
         'Dependents'      : 1 if dependents == "Yes" else 0,
         'PhoneService'    : 1 if phone == "Yes" else 0,
         'PaperlessBilling': 1 if paperless == "Yes" else 0,
-        'MultipleLines'   : {'No phone service':0,'No':1,'Yes':2}[multi_lines],
+        'MultipleLines'   : {'No phone service': 0, 'No': 1, 'Yes': 2}[multi_lines],
     }
     for col, val in binary_map.items():
         if col in row.columns:
             row[col] = val
 
     onehot = {
-        'InternetService_Fiber optic'           : 1 if internet=="Fiber optic" else 0,
-        'InternetService_No'                    : 1 if internet=="No" else 0,
-        'Contract_One year'                     : 1 if contract=="One year" else 0,
-        'Contract_Two year'                     : 1 if contract=="Two year" else 0,
-        'PaymentMethod_Credit card (automatic)' : 1 if payment=="Credit card (automatic)" else 0,
-        'PaymentMethod_Electronic check'        : 1 if payment=="Electronic check" else 0,
-        'PaymentMethod_Mailed check'            : 1 if payment=="Mailed check" else 0,
+        'InternetService_Fiber optic'           : 1 if internet == "Fiber optic" else 0,
+        'InternetService_No'                    : 1 if internet == "No" else 0,
+        'Contract_One year'                     : 1 if contract == "One year" else 0,
+        'Contract_Two year'                     : 1 if contract == "Two year" else 0,
+        'PaymentMethod_Credit card (automatic)' : 1 if payment == "Credit card (automatic)" else 0,
+        'PaymentMethod_Electronic check'        : 1 if payment == "Electronic check" else 0,
+        'PaymentMethod_Mailed check'            : 1 if payment == "Mailed check" else 0,
     }
     for col, val in onehot.items():
         if col in row.columns:
@@ -109,37 +108,11 @@ def build_input():
 
     return row
 
-# ---- Save to history ----
-def save_to_history(customer_data, prob, pred):
-    history_file = 'prediction_history.csv'
-    file_exists  = os.path.exists(history_file)
-    with open(history_file, 'a', newline='') as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            writer.writerow([
-                'Date','Time','Tenure','Monthly','Contract',
-                'Internet','Churn_Probability','Prediction','Risk_Level'
-            ])
-        risk = get_risk_label(prob) if modules_loaded else (
-            "High" if prob > 0.65 else ("Medium" if prob > 0.4 else "Low")
-        )
-        writer.writerow([
-            datetime.date.today(),
-            datetime.datetime.now().strftime('%H:%M'),
-            customer_data.get('tenure',''),
-            customer_data.get('monthly_charges',''),
-            customer_data.get('contract',''),
-            customer_data.get('internet',''),
-            f"{prob:.2%}",
-            'CHURN' if pred==1 else 'STAY',
-            risk
-        ])
-
 # ---- Predict button ----
 if st.button("Predict Churn Risk", use_container_width=True):
     input_row = build_input()
     prob      = model.predict_proba(input_row)[0][1]
-    pred      = model.predict(input_row)[0]
+    pred      = int(model.predict(input_row)[0])
 
     # Build customer data dict
     customer_data = {
@@ -156,12 +129,30 @@ if st.button("Predict Churn Risk", use_container_width=True):
         'tech_support'    : tech_supp,
     }
 
-    # Save to history
-    save_to_history(customer_data, prob, pred)
+    # ---- Get risk level ----
+    if modules_loaded:
+        risk = get_risk_label(prob)
+    else:
+        risk = ("High Risk" if prob > 0.65 else
+                "Medium Risk" if prob > 0.4 else "Low Risk")
+
+    # ---- Save to database ----
+    if modules_loaded:
+        try:
+            save_prediction(
+                user_id       = st.session_state.get('user_id', 0),
+                username      = st.session_state.get('username', 'unknown'),
+                customer_data = customer_data,
+                prob          = prob,
+                pred          = pred,
+                risk_level    = risk
+            )
+        except Exception as e:
+            st.warning(f"Could not save to history: {e}")
 
     st.divider()
 
-    # ---- Results row ----
+    # ---- Results ----
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Churn Probability", f"{prob:.0%}")
     c2.metric("Tenure",            f"{tenure} months")
@@ -170,7 +161,6 @@ if st.button("Predict Churn Risk", use_container_width=True):
 
     st.progress(float(prob))
 
-    # ---- Prediction result ----
     if pred == 1:
         st.error(f"This customer is likely to CHURN — Risk: {prob:.0%}")
     else:
@@ -185,9 +175,9 @@ if st.button("Predict Churn Risk", use_container_width=True):
         recs = get_recommendations(customer_data, prob, pred)
 
         if pred == 1:
-            st.warning(f"Risk Level: High — {len(recs)} action(s) recommended")
+            st.warning(f"Risk Level: {risk} — {len(recs)} action(s) recommended")
         else:
-            st.info(f"Risk Level: Low — Routine monitoring advised")
+            st.info(f"Risk Level: {risk} — Routine monitoring advised")
 
         for i, rec in enumerate(recs, 1):
             if pred == 1:
@@ -209,7 +199,7 @@ if st.button("Predict Churn Risk", use_container_width=True):
             filename = (
                 f"churn_report_"
                 f"{datetime.date.today().strftime('%Y%m%d')}_"
-                f"{tenure}mo_{contract.replace(' ','-')}.pdf"
+                f"{tenure}mo_{contract.replace(' ', '-')}.pdf"
             )
             st.download_button(
                 label="Download PDF Report",
@@ -225,5 +215,8 @@ if st.button("Predict Churn Risk", use_container_width=True):
         except Exception as e:
             st.error(f"PDF generation error: {e}")
     else:
-        st.info("Recommendation engine not loaded. "
-                "Check that recommendations.py and pdf_report.py exist.")
+        st.info(
+            "Recommendation engine not loaded. "
+            "Check that recommendations.py, pdf_report.py "
+            "and database.py exist."
+        )
