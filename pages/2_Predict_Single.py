@@ -1,4 +1,4 @@
-# pages/2_Predict_Single.py — Single prediction with PDF + recommendations + database
+# pages/2_Predict_Single.py — Single prediction with SHAP + PDF + database
 
 import streamlit as st
 import pandas as pd
@@ -34,7 +34,7 @@ except Exception as e:
 
 st.title("Predict Single Customer")
 st.write("Enter customer details and click Predict to get churn risk, "
-         "smart recommendations, and a downloadable PDF report.")
+         "SHAP explanation, smart recommendations, and a PDF report.")
 st.divider()
 
 # ---- Input Form ----
@@ -129,14 +129,14 @@ if st.button("Predict Churn Risk", use_container_width=True):
         'tech_support'    : tech_supp,
     }
 
-    # ---- Get risk level ----
+    # Get risk level
     if modules_loaded:
         risk = get_risk_label(prob)
     else:
         risk = ("High Risk" if prob > 0.65 else
                 "Medium Risk" if prob > 0.4 else "Low Risk")
 
-    # ---- Save to database ----
+    # Save to database
     if modules_loaded:
         try:
             save_prediction(
@@ -152,7 +152,7 @@ if st.button("Predict Churn Risk", use_container_width=True):
 
     st.divider()
 
-    # ---- Results ----
+    # ---- Results metrics ----
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Churn Probability", f"{prob:.0%}")
     c2.metric("Tenure",            f"{tenure} months")
@@ -168,33 +168,122 @@ if st.button("Predict Churn Risk", use_container_width=True):
 
     st.divider()
 
-    # ---- Smart Recommendations ----
-    st.subheader("Smart Retention Recommendations")
+    # ================================================
+    # SHAP EXPLANATION
+    # ================================================
+    st.subheader("Why did the model predict this?")
 
-    if modules_loaded:
-        recs = get_recommendations(customer_data, prob, pred)
+    shap_loaded = False
+    shap_recs   = []
 
-        if pred == 1:
-            st.warning(f"Risk Level: {risk} — {len(recs)} action(s) recommended")
-        else:
-            st.info(f"Risk Level: {risk} — Routine monitoring advised")
+    try:
+        from shap_explainer import (get_shap_explanation,
+                                    get_shap_recommendations,
+                                    plot_shap_bar)
 
-        for i, rec in enumerate(recs, 1):
-            if pred == 1:
-                st.error(f"Action {i}: {rec}")
-            else:
-                st.success(f"Note {i}: {rec}")
+        with st.spinner("Calculating SHAP explanation..."):
+            shap_exp   = get_shap_explanation(input_row)
+            shap_recs  = get_shap_recommendations(shap_exp, pred)
+            shap_chart = plot_shap_bar(shap_exp)
+            shap_loaded = True
+
+        # Show SHAP bar chart
+        st.image(shap_chart, use_container_width=True)
+        st.caption(
+            "Red bars = factors pushing this customer toward churn. "
+            "Green bars = factors keeping them loyal. "
+            "Longer bar = stronger impact on the prediction."
+        )
 
         st.divider()
 
-        # ---- PDF Download ----
-        st.subheader("Download Report")
-        st.write("Click below to download a professional PDF report "
-                 "of this prediction.")
+        # Top risk factors side by side
+        st.subheader("Top contributing factors")
 
+        risk_inc = shap_exp['risk_increasers']
+        risk_dec = shap_exp['risk_decreasers']
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("**Factors increasing churn risk:**")
+            if len(risk_inc) > 0:
+                for feat, val in risk_inc.head(3).items():
+                    clean = (feat.replace('_', ' ')
+                                 .replace('InternetService', 'Internet:')
+                                 .replace('Contract', 'Contract:')
+                                 .replace('PaymentMethod', 'Payment:'))[:35]
+                    st.error(f"↑ {clean}  (+{val:.3f})")
+            else:
+                st.info("No strong risk-increasing factors found.")
+
+        with col2:
+            st.markdown("**Factors reducing churn risk:**")
+            if len(risk_dec) > 0:
+                for feat, val in risk_dec.head(3).items():
+                    clean = (feat.replace('_', ' ')
+                                 .replace('InternetService', 'Internet:')
+                                 .replace('Contract', 'Contract:')
+                                 .replace('PaymentMethod', 'Payment:'))[:35]
+                    st.success(f"↓ {clean}  ({val:.3f})")
+            else:
+                st.info("No strong risk-reducing factors found.")
+
+        st.divider()
+
+    except Exception as e:
+        st.info(f"SHAP explanation unavailable: {e}")
+        shap_loaded = False
+
+    # ================================================
+    # RECOMMENDATIONS
+    # ================================================
+    st.subheader("Smart Retention Recommendations")
+
+    # Use SHAP recommendations if available
+    # Otherwise fall back to rule-based recommendations
+    if shap_loaded and shap_recs:
+        final_recs = shap_recs
+        st.write(
+            "These recommendations are generated directly from "
+            "what the ML model learned — not manual rules."
+        )
+    elif modules_loaded:
+        final_recs = get_recommendations(customer_data, prob, pred)
+        st.write("Recommendations based on customer profile analysis.")
+    else:
+        final_recs = ["Please check that all helper files exist."]
+
+    if pred == 1:
+        st.warning(
+            f"Risk Level: {risk} — "
+            f"{len(final_recs)} action(s) recommended"
+        )
+    else:
+        st.info(f"Risk Level: {risk} — Routine monitoring advised")
+
+    for i, rec in enumerate(final_recs, 1):
+        if pred == 1:
+            st.error(f"Action {i}: {rec}")
+        else:
+            st.success(f"Note {i}: {rec}")
+
+    st.divider()
+
+    # ================================================
+    # PDF DOWNLOAD
+    # ================================================
+    st.subheader("Download Report")
+    st.write(
+        "Download a professional PDF report of this prediction "
+        "including customer details, risk assessment, "
+        "and all recommendations."
+    )
+
+    if modules_loaded:
         try:
             pdf_bytes = generate_churn_report(
-                customer_data, prob, pred, recs
+                customer_data, prob, pred, final_recs
             )
             filename = (
                 f"churn_report_"
@@ -216,7 +305,6 @@ if st.button("Predict Churn Risk", use_container_width=True):
             st.error(f"PDF generation error: {e}")
     else:
         st.info(
-            "Recommendation engine not loaded. "
-            "Check that recommendations.py, pdf_report.py "
-            "and database.py exist."
+            "PDF generation unavailable. "
+            "Check that pdf_report.py exists."
         )

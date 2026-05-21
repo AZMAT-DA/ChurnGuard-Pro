@@ -11,3 +11,4 @@ torch
 reportlab==4.0.9
 pillow
 bcrypt
+shap
