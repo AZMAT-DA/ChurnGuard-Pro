@@ -1,4 +1,4 @@
-# pages/2_Predict_Single.py — Multi-industry prediction
+# pages/2_Predict_Single.py — Multi-industry prediction FIXED
 
 import streamlit as st
 import pandas as pd
@@ -14,7 +14,6 @@ if 'logged_in' not in st.session_state or not st.session_state.logged_in:
     st.page_link("app.py", label="Go to Login page")
     st.stop()
 
-# Load helpers
 try:
     from recommendations import get_recommendations, get_risk_label
     from pdf_report       import generate_churn_report
@@ -29,9 +28,6 @@ st.title("Predict Single Customer")
 st.write("Select your industry, enter customer details, and get instant churn prediction.")
 st.divider()
 
-# ================================================
-# INDUSTRY SELECTOR
-# ================================================
 industry_options = {
     'telecom'  : '📡 Telecom',
     'banking'  : '🏦 Banking',
@@ -45,9 +41,6 @@ selected = st.selectbox(
     index=0
 )
 
-st.session_state.selected_industry = selected
-
-# Load model for selected industry
 config = INDUSTRIES[selected]
 
 try:
@@ -56,22 +49,17 @@ try:
     feature_names = joblib.load(config['features_file'])
     st.success(f"Model loaded: {industry_options[selected]}")
 except Exception as e:
-    st.error(f"Model not found for {selected}. Run multi_train.py first. Error: {e}")
+    st.error(f"Model not found. Run multi_train.py first. Error: {e}")
     st.stop()
 
 st.divider()
 
-# ================================================
-# INPUT FORMS — DIFFERENT PER INDUSTRY
-# ================================================
-
 customer_data = {}
 
-# ---- TELECOM FORM ----
+# ---- TELECOM ----
 if selected == 'telecom':
     st.subheader("📡 Telecom Customer Details")
     col1, col2 = st.columns(2)
-
     with col1:
         gender      = st.selectbox("Gender", ["Male", "Female"])
         senior      = st.selectbox("Senior Citizen", ["No", "Yes"])
@@ -81,7 +69,6 @@ if selected == 'telecom':
         phone       = st.selectbox("Phone Service?", ["Yes", "No"])
         multi_lines = st.selectbox("Multiple Lines?",
                                    ["No", "Yes", "No phone service"])
-
     with col2:
         internet  = st.selectbox("Internet Service",
                                  ["DSL", "Fiber optic", "No"])
@@ -98,14 +85,18 @@ if selected == 'telecom':
         total   = monthly * tenure
 
     customer_data = {
-        'tenure': f"{tenure} months", 'monthly_charges': f"${monthly}",
-        'contract': contract, 'internet': internet,
-        'payment': payment, 'senior': senior,
-        'partner': partner, 'tech_support': tech_supp,
-        'paperless': paperless,
+        'tenure'         : f"{tenure} months",
+        'monthly_charges': f"${monthly}",
+        'contract'       : contract,
+        'internet'       : internet,
+        'payment'        : payment,
+        'senior'         : senior,
+        'partner'        : partner,
+        'tech_support'   : tech_supp,
+        'paperless'      : paperless,
     }
 
-    def build_telecom():
+    def build_input():
         row = pd.DataFrame(
             [np.zeros(len(feature_names))], columns=feature_names
         )
@@ -115,7 +106,6 @@ if selected == 'telecom':
         ):
             if col in row.columns:
                 row[col] = val
-
         binary = {
             'gender'          : 1 if gender == "Male" else 0,
             'SeniorCitizen'   : 1 if senior == "Yes" else 0,
@@ -130,17 +120,20 @@ if selected == 'telecom':
         for col, val in binary.items():
             if col in row.columns:
                 row[col] = val
-
         onehot = {
-            'InternetService_Fiber optic': 1 if internet == "Fiber optic" else 0,
-            'InternetService_No'         : 1 if internet == "No" else 0,
-            'Contract_One year'          : 1 if contract == "One year" else 0,
-            'Contract_Two year'          : 1 if contract == "Two year" else 0,
+            'InternetService_Fiber optic':
+                1 if internet == "Fiber optic" else 0,
+            'InternetService_No'         :
+                1 if internet == "No" else 0,
+            'Contract_One year'          :
+                1 if contract == "One year" else 0,
+            'Contract_Two year'          :
+                1 if contract == "Two year" else 0,
             'PaymentMethod_Credit card (automatic)':
                 1 if payment == "Credit card (automatic)" else 0,
             'PaymentMethod_Electronic check':
                 1 if payment == "Electronic check" else 0,
-            'PaymentMethod_Mailed check':
+            'PaymentMethod_Mailed check' :
                 1 if payment == "Mailed check" else 0,
         }
         for col, val in onehot.items():
@@ -148,94 +141,69 @@ if selected == 'telecom':
                 row[col] = val
         return row
 
-    build_input = build_telecom
-
-# ---- BANKING FORM ----
+# ---- BANKING ----
 elif selected == 'banking':
     st.subheader("🏦 Bank Customer Details")
     col1, col2 = st.columns(2)
-
     with col1:
-        credit_score  = st.slider("Credit Score", 300, 900, 650)
-        geography     = st.selectbox("Country",
-                                     ["France", "Germany", "Spain"])
-        gender        = st.selectbox("Gender", ["Male", "Female"])
-        age           = st.slider("Age", 18, 92, 35)
-        tenure        = st.slider("Tenure (years)", 0, 10, 3)
-
+        credit_score = st.slider("Credit Score", 300, 900, 650)
+        geography    = st.selectbox("Country",
+                                    ["France", "Germany", "Spain"])
+        gender_b     = st.selectbox("Gender", ["Male", "Female"])
+        age          = st.slider("Age", 18, 92, 35)
+        tenure_b     = st.slider("Tenure (years)", 0, 10, 3)
     with col2:
-        balance       = st.number_input("Account Balance ($)",
-                                        min_value=0.0,
-                                        max_value=300000.0,
-                                        value=50000.0,
-                                        step=1000.0)
-        num_products  = st.selectbox("Number of Products", [1, 2, 3, 4])
-        has_cr_card   = st.selectbox("Has Credit Card?", ["Yes", "No"])
-        is_active     = st.selectbox("Active Member?", ["Yes", "No"])
-        salary        = st.number_input("Estimated Salary ($)",
-                                        min_value=0.0,
-                                        max_value=300000.0,
-                                        value=60000.0,
-                                        step=1000.0)
+        balance      = st.number_input("Account Balance ($)",
+                                       0.0, 300000.0, 50000.0, 1000.0)
+        num_products = st.selectbox("Number of Products", [1, 2, 3, 4])
+        has_cr_card  = st.selectbox("Has Credit Card?", ["Yes", "No"])
+        is_active    = st.selectbox("Active Member?", ["Yes", "No"])
+        salary       = st.number_input("Estimated Salary ($)",
+                                       0.0, 300000.0, 60000.0, 1000.0)
 
     customer_data = {
-        'tenure'        : f"{tenure} years",
-        'monthly_charges': f"${salary/12:.0f}",
-        'contract'      : f"{num_products} products",
-        'internet'      : geography,
-        'payment'       : f"Age {age}",
-        'senior'        : "Yes" if age >= 60 else "No",
-        'partner'       : f"Balance ${balance:,.0f}",
+        'tenure'         : f"{tenure_b} years",
+        'monthly_charges': f"${salary/12:.0f}/month",
+        'contract'       : f"{num_products} product(s)",
+        'internet'       : geography,
+        'payment'        : gender_b,
+        'senior'         : "Yes" if age >= 60 else "No",
+        'partner'        : f"Balance ${balance:,.0f}",
+        'tech_support'   : "Active" if is_active == "Yes" else "Inactive",
+        'paperless'      : "Yes" if has_cr_card == "Yes" else "No",
     }
 
-    def build_banking():
-        row = pd.DataFrame(
-            [np.zeros(len(feature_names))], columns=feature_names
-        )
-        raw_vals = {
-            'CreditScore'    : credit_score,
-            'Age'            : age,
-            'Tenure'         : tenure,
-            'Balance'        : balance,
-            'NumOfProducts'  : num_products,
-            'HasCrCard'      : 1 if has_cr_card == "Yes" else 0,
-            'IsActiveMember' : 1 if is_active == "Yes" else 0,
-            'EstimatedSalary': salary,
+    def build_input():
+        # Build raw feature dict matching training columns
+        raw = {
+            'CreditScore'    : float(credit_score),
+            'Age'            : float(age),
+            'Tenure'         : float(tenure_b),
+            'Balance'        : float(balance),
+            'NumOfProducts'  : float(num_products),
+            'HasCrCard'      : 1.0 if has_cr_card == "Yes" else 0.0,
+            'IsActiveMember' : 1.0 if is_active == "Yes" else 0.0,
+            'EstimatedSalary': float(salary),
+            'Geography_Germany': 1.0 if geography == "Germany" else 0.0,
+            'Geography_Spain'  : 1.0 if geography == "Spain" else 0.0,
+            'Gender_Male'      : 1.0 if gender_b == "Male" else 0.0,
         }
-        raw_df     = pd.DataFrame([raw_vals])
-        geo_map    = {
-            'France' : [0, 0],
-            'Germany': [1, 0],
-            'Spain'  : [0, 1]
-        }
-        geo_vals   = geo_map.get(geography, [0, 0])
-        raw_df['Geography_Germany'] = geo_vals[0]
-        raw_df['Geography_Spain']   = geo_vals[1]
-        raw_df['Gender_Male'] = 1 if gender == "Male" else 0
-
-        # Scale
-        all_cols   = raw_df.columns.tolist()
-        scaled     = scaler.transform(raw_df[
-            [c for c in all_cols if c in feature_names]
-        ])
-        scaled_df  = pd.DataFrame(
-            scaled,
-            columns=[c for c in all_cols if c in feature_names]
-        )
+        # Build row aligned to feature_names
+        row_vals = []
         for col in feature_names:
-            if col in scaled_df.columns:
-                row[col] = scaled_df[col].values[0]
+            row_vals.append(raw.get(col, 0.0))
+        row_array = np.array(row_vals).reshape(1, -1)
+        # Scale
+        scaled = scaler.transform(row_array)
+        row    = pd.DataFrame(scaled, columns=feature_names)
         return row
 
-    build_input = build_banking
-
-# ---- ECOMMERCE FORM ----
+# ---- ECOMMERCE ----
 elif selected == 'ecommerce':
     st.subheader("🛒 E-Commerce Customer Details")
     col1, col2 = st.columns(2)
-
     with col1:
-        tenure_ec    = st.slider("Tenure (months)", 0, 36, 6)
+        tenure_e     = st.slider("Tenure (months)", 0, 36, 6)
         login_device = st.selectbox("Preferred Login Device",
                                     ["Mobile Phone", "Computer", "Phone"])
         city_tier    = st.selectbox("City Tier", [1, 2, 3])
@@ -243,16 +211,15 @@ elif selected == 'ecommerce':
         payment_mode = st.selectbox("Preferred Payment",
                                     ["Debit Card", "UPI", "Credit Card",
                                      "Cash on Delivery", "E wallet", "CC"])
-        gender_ec    = st.selectbox("Gender", ["Male", "Female"])
+        gender_e     = st.selectbox("Gender", ["Male", "Female"])
         hours_app    = st.slider("Hours Spent on App", 0, 6, 3)
-
     with col2:
-        num_devices  = st.slider("Number of Devices Registered", 1, 6, 3)
+        num_devices  = st.slider("Devices Registered", 1, 6, 3)
         order_cat    = st.selectbox("Preferred Order Category",
                                     ["Laptop & Accessory", "Mobile",
                                      "Mobile Phone", "Others",
                                      "Fashion", "Grocery"])
-        satisfaction = st.selectbox("Satisfaction Score (1-5)",
+        satisfaction = st.selectbox("Satisfaction Score (1=low, 5=high)",
                                     [1, 2, 3, 4, 5], index=2)
         marital      = st.selectbox("Marital Status",
                                     ["Single", "Married", "Divorced"])
@@ -261,111 +228,69 @@ elif selected == 'ecommerce':
         cashback     = st.slider("Cashback Amount ($)", 0, 300, 150)
 
     customer_data = {
-        'tenure'         : f"{tenure_ec} months",
-        'monthly_charges': f"Satisfaction {satisfaction}/5",
+        'tenure'         : f"{tenure_e} months",
+        'monthly_charges': f"Cashback ${cashback}",
         'contract'       : login_device,
         'internet'       : order_cat,
         'payment'        : payment_mode,
         'senior'         : "No",
         'partner'        : marital,
+        'tech_support'   : "Yes" if complain == "No" else "No",
+        'paperless'      : "Yes",
     }
 
-    def build_ecommerce():
-        row = pd.DataFrame(
-            [np.zeros(len(feature_names))], columns=feature_names
-        )
-        raw_vals = {
-            'Tenure'                      : tenure_ec,
-            'CityTier'                    : city_tier,
-            'WarehouseToHome'             : warehouse,
-            'HourSpendOnApp'              : hours_app,
-            'NumberOfDeviceRegistered'    : num_devices,
-            'SatisfactionScore'           : satisfaction,
-            'NumberOfAddress'             : num_address,
-            'Complain'                    : 1 if complain == "Yes" else 0,
-            'OrderAmountHikeFromlastYear' : 15,
-            'CouponUsed'                  : 2,
-            'OrderCount'                  : 3,
-            'DaySinceLastOrder'           : 5,
-            'CashbackAmount'              : cashback,
-        }
-        raw_df = pd.DataFrame([raw_vals])
-
-        # One-hot for categorical
-        device_cols = {
+    def build_input():
+        raw = {
+            'Tenure'                      : float(tenure_e),
+            'CityTier'                    : float(city_tier),
+            'WarehouseToHome'             : float(warehouse),
+            'HourSpendOnApp'              : float(hours_app),
+            'NumberOfDeviceRegistered'    : float(num_devices),
+            'SatisfactionScore'           : float(satisfaction),
+            'NumberOfAddress'             : float(num_address),
+            'Complain'                    : 1.0 if complain == "Yes" else 0.0,
+            'OrderAmountHikeFromlastYear' : 15.0,
+            'CouponUsed'                  : 2.0,
+            'OrderCount'                  : 3.0,
+            'DaySinceLastOrder'           : 5.0,
+            'CashbackAmount'              : float(cashback),
+            # One-hot encoded columns
             'PreferredLoginDevice_Mobile Phone':
-                1 if login_device == "Mobile Phone" else 0,
-            'PreferredLoginDevice_Phone':
-                1 if login_device == "Phone" else 0,
-        }
-        pay_cols = {
+                1.0 if login_device == "Mobile Phone" else 0.0,
+            'PreferredLoginDevice_Phone'  :
+                1.0 if login_device == "Phone" else 0.0,
             'PreferredPaymentMode_Credit Card':
-                1 if payment_mode == "Credit Card" else 0,
+                1.0 if payment_mode == "Credit Card" else 0.0,
             'PreferredPaymentMode_Debit Card':
-                1 if payment_mode == "Debit Card" else 0,
+                1.0 if payment_mode == "Debit Card" else 0.0,
             'PreferredPaymentMode_E wallet':
-                1 if payment_mode == "E wallet" else 0,
-            'PreferredPaymentMode_UPI':
-                1 if payment_mode == "UPI" else 0,
+                1.0 if payment_mode == "E wallet" else 0.0,
+            'PreferredPaymentMode_UPI'    :
+                1.0 if payment_mode == "UPI" else 0.0,
             'PreferredPaymentMode_Cash on Delivery':
-                1 if payment_mode == "Cash on Delivery" else 0,
-        }
-        gender_cols = {
-            'Gender_Male': 1 if gender_ec == "Male" else 0,
-        }
-        order_cols = {
-            'PreferedOrderCat_Grocery':
-                1 if order_cat == "Grocery" else 0,
+                1.0 if payment_mode == "Cash on Delivery" else 0.0,
+            'Gender_Male'                 :
+                1.0 if gender_e == "Male" else 0.0,
+            'PreferedOrderCat_Grocery'    :
+                1.0 if order_cat == "Grocery" else 0.0,
             'PreferedOrderCat_Laptop & Accessory':
-                1 if order_cat == "Laptop & Accessory" else 0,
-            'PreferedOrderCat_Mobile':
-                1 if order_cat == "Mobile" else 0,
+                1.0 if order_cat == "Laptop & Accessory" else 0.0,
+            'PreferedOrderCat_Mobile'     :
+                1.0 if order_cat == "Mobile" else 0.0,
             'PreferedOrderCat_Mobile Phone':
-                1 if order_cat == "Mobile Phone" else 0,
-            'PreferedOrderCat_Others':
-                1 if order_cat == "Others" else 0,
+                1.0 if order_cat == "Mobile Phone" else 0.0,
+            'PreferedOrderCat_Others'     :
+                1.0 if order_cat == "Others" else 0.0,
+            'MaritalStatus_Married'       :
+                1.0 if marital == "Married" else 0.0,
+            'MaritalStatus_Single'        :
+                1.0 if marital == "Single" else 0.0,
         }
-        marital_cols = {
-            'MaritalStatus_Married':
-                1 if marital == "Married" else 0,
-            'MaritalStatus_Single':
-                1 if marital == "Single" else 0,
-        }
-
-        all_extra = {
-            **device_cols, **pay_cols, **gender_cols,
-            **order_cols,  **marital_cols
-        }
-        for k, v in all_extra.items():
-            raw_df[k] = v
-
-        # Scale numeric columns
-        num_cols  = list(raw_vals.keys())
-        scale_df  = raw_df[num_cols].copy()
-        # Build full feature row
-        for col in feature_names:
-            if col in raw_df.columns:
-                row[col] = raw_df[col].values[0]
-        # Apply scaler to numeric only
-        try:
-            num_feat = [c for c in num_cols if c in feature_names]
-            if num_feat:
-                temp = pd.DataFrame(
-                    [np.zeros(len(feature_names))],
-                    columns=feature_names
-                )
-                for c in num_feat:
-                    temp[c] = raw_df[c].values[0]
-                scaled = scaler.transform(temp)
-                row    = pd.DataFrame(scaled, columns=feature_names)
-                for col in feature_names:
-                    if col in all_extra:
-                        row[col] = all_extra[col]
-        except Exception:
-            pass
+        row_vals = [raw.get(col, 0.0) for col in feature_names]
+        row_array = np.array(row_vals, dtype=float).reshape(1, -1)
+        scaled    = scaler.transform(row_array)
+        row       = pd.DataFrame(scaled, columns=feature_names)
         return row
-
-    build_input = build_ecommerce
 
 # ================================================
 # PREDICT BUTTON
@@ -375,12 +300,12 @@ st.divider()
 if st.button("Predict Churn Risk", use_container_width=True):
     try:
         input_row = build_input()
-        prob      = model.predict_proba(input_row)[0][1]
+        prob      = float(model.predict_proba(input_row)[0][1])
         pred      = int(model.predict(input_row)[0])
 
         risk = get_risk_label(prob) if modules_loaded else (
-            "High Risk" if prob > 0.65 else
-            "Medium Risk" if prob > 0.4 else "Low Risk"
+            "High Risk"   if prob > 0.65 else
+            "Medium Risk" if prob > 0.40 else "Low Risk"
         )
 
         # Save to database
@@ -395,16 +320,14 @@ if st.button("Predict Churn Risk", use_container_width=True):
                     risk_level    = risk
                 )
             except Exception as e:
-                st.warning(f"Could not save to history: {e}")
+                st.warning(f"Could not save: {e}")
 
         st.divider()
 
-        # Results
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Churn Probability", f"{prob:.0%}")
-        c2.metric("Industry",
-                  industry_options[selected])
-        c3.metric("Risk Level", risk)
+        c2.metric("Industry",          industry_options[selected])
+        c3.metric("Risk Level",        risk)
         c4.metric("Prediction",
                   "WILL CHURN" if pred == 1 else "WILL STAY")
 
@@ -416,41 +339,207 @@ if st.button("Predict Churn Risk", use_container_width=True):
             )
         else:
             st.success(
-                f"This customer is likely to STAY — Churn risk: {prob:.0%}"
+                f"This customer is likely to STAY — Risk: {prob:.0%}"
             )
 
         st.divider()
 
-        # SHAP + Recommendations
-        try:
-            from shap_explainer import (get_shap_explanation,
-                                        get_shap_recommendations,
-                                        plot_shap_bar)
-            with st.spinner("Calculating SHAP explanation..."):
-                shap_exp   = get_shap_explanation(input_row)
-                shap_recs  = get_shap_recommendations(shap_exp, pred)
-                shap_chart = plot_shap_bar(shap_exp)
+        # SHAP — only for telecom (same model structure)
+        # For banking/ecommerce use rule-based recommendations
+        final_recs = []
 
-            st.subheader("Why did the model predict this?")
-            st.image(shap_chart, use_container_width=True)
-            st.caption(
-                "Red = increases churn risk | "
-                "Green = decreases churn risk"
-            )
-            final_recs = shap_recs
-        except Exception:
-            if modules_loaded:
-                final_recs = get_recommendations(
-                    customer_data, prob, pred
+        if selected == 'telecom':
+            try:
+                from shap_explainer import (get_shap_explanation,
+                                            get_shap_recommendations,
+                                            plot_shap_bar)
+                # Reload telecom model for SHAP
+                import joblib as jb
+                shap_model = jb.load('models/telecom_model.pkl')
+
+                import shap
+                shap_explainer = shap.TreeExplainer(shap_model)
+                sv             = shap_explainer.shap_values(input_row)
+                sv_series      = pd.Series(
+                    sv[0], index=feature_names
                 )
-            else:
-                final_recs = ["Check that all helper files exist."]
+                sorted_sv = sv_series.reindex(
+                    sv_series.abs().sort_values(ascending=False).index
+                )
+                risk_inc = sorted_sv[sorted_sv > 0].head(5)
+                risk_dec = sorted_sv[sorted_sv < 0].head(5)
 
+                st.subheader("Why did the model predict this?")
+
+                import io
+                import matplotlib
+                matplotlib.use('Agg')
+                import matplotlib.pyplot as plt
+                from matplotlib.patches import Patch
+
+                top8 = sorted_sv.head(8)
+                clean_names = [
+                    n.replace('_', ' ')[:30] for n in top8.index
+                ]
+                vals   = top8.values
+                colors = ['#E24B4A' if v > 0 else '#1A7A4A'
+                          for v in vals]
+
+                fig, ax = plt.subplots(figsize=(8, 5))
+                ax.barh(range(len(clean_names)), vals,
+                        color=colors, alpha=0.85, height=0.6)
+                ax.set_yticks(range(len(clean_names)))
+                ax.set_yticklabels(clean_names, fontsize=10)
+                ax.axvline(x=0, color='gray', linewidth=0.8)
+                ax.set_xlabel('SHAP value', fontsize=10)
+                ax.set_title('Why did the model predict this?',
+                             fontsize=12, fontweight='bold')
+                legend = [
+                    Patch(color='#E24B4A', alpha=0.85,
+                          label='Increases churn risk'),
+                    Patch(color='#1A7A4A', alpha=0.85,
+                          label='Decreases churn risk')
+                ]
+                ax.legend(handles=legend, loc='lower right', fontsize=9)
+                ax.invert_yaxis()
+                plt.tight_layout()
+                buf = io.BytesIO()
+                plt.savefig(buf, format='png', dpi=130,
+                            bbox_inches='tight')
+                buf.seek(0)
+                plt.close()
+                st.image(buf.getvalue(), use_container_width=True)
+                st.caption(
+                    "Red = increases churn | Green = decreases churn"
+                )
+
+                st.divider()
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown("**Factors increasing risk:**")
+                    for feat, val in risk_inc.head(3).items():
+                        clean = feat.replace('_', ' ')[:30]
+                        st.error(f"↑ {clean}  (+{val:.3f})")
+                with col2:
+                    st.markdown("**Factors reducing risk:**")
+                    for feat, val in risk_dec.head(3).items():
+                        clean = feat.replace('_', ' ')[:30]
+                        st.success(f"↓ {clean}  ({val:.3f})")
+
+                # SHAP-based recs
+                for feat, val in risk_inc.items():
+                    pct = round(abs(val) * 100, 1)
+                    if 'Contract' in feat:
+                        final_recs.append(
+                            f"Contract type is a top churn driver "
+                            f"(+{pct}% risk). Offer upgrade with 20% discount."
+                        )
+                    elif 'tenure' in feat.lower():
+                        final_recs.append(
+                            f"Short tenure increases risk (+{pct}%). "
+                            "Assign onboarding support agent."
+                        )
+                    elif 'MonthlyCharges' in feat:
+                        final_recs.append(
+                            f"High charges driving churn (+{pct}%). "
+                            "Offer 10-15% bill reduction bundle."
+                        )
+                    elif 'Fiber' in feat:
+                        final_recs.append(
+                            f"Fiber optic service is a risk factor (+{pct}%). "
+                            "Check service quality proactively."
+                        )
+                    elif 'Electronic check' in feat:
+                        final_recs.append(
+                            f"Electronic check payment increases risk (+{pct}%). "
+                            "Suggest switching to auto-payment."
+                        )
+
+            except Exception as shap_e:
+                st.info(f"SHAP unavailable: {shap_e}")
+                if modules_loaded:
+                    final_recs = get_recommendations(
+                        customer_data, prob, pred
+                    )
+
+        else:
+            # Banking and E-Commerce — rule-based recommendations
+            if selected == 'banking':
+                if pred == 1:
+                    if num_products >= 3:
+                        final_recs.append(
+                            "Customer has 3+ products which paradoxically "
+                            "increases churn. Review product fit and simplify."
+                        )
+                    if age > 45:
+                        final_recs.append(
+                            "Older customers need dedicated relationship "
+                            "manager. Schedule personal review call."
+                        )
+                    if is_active == "No":
+                        final_recs.append(
+                            "Inactive member — send re-engagement campaign "
+                            "with exclusive offer to restore activity."
+                        )
+                    if geography == "Germany":
+                        final_recs.append(
+                            "Germany has highest churn rate. "
+                            "Offer region-specific loyalty program."
+                        )
+                    if not final_recs:
+                        final_recs.append(
+                            "Schedule personal customer review call and "
+                            "offer loyalty package."
+                        )
+                else:
+                    final_recs.append(
+                        "Customer shows low churn risk. "
+                        "Maintain service quality."
+                    )
+                    final_recs.append(
+                        "Consider upsell opportunity — customer is "
+                        "satisfied and may welcome premium products."
+                    )
+
+            elif selected == 'ecommerce':
+                if pred == 1:
+                    if complain == "Yes":
+                        final_recs.append(
+                            "Customer has filed complaint. "
+                            "Resolve immediately and offer compensation coupon."
+                        )
+                    if satisfaction <= 2:
+                        final_recs.append(
+                            f"Low satisfaction score ({satisfaction}/5). "
+                            "Send personal apology and discount voucher."
+                        )
+                    if tenure_e < 6:
+                        final_recs.append(
+                            "New customer (under 6 months). "
+                            "Assign dedicated support and welcome rewards."
+                        )
+                    if not final_recs:
+                        final_recs.append(
+                            "Send personalized retention offer with "
+                            "cashback increase and free shipping."
+                        )
+                else:
+                    final_recs.append(
+                        "Customer is satisfied. Maintain current "
+                        "service level and consider loyalty rewards."
+                    )
+
+        # Show recommendations
         st.divider()
         st.subheader("Smart Recommendations")
 
+        if not final_recs and modules_loaded:
+            final_recs = get_recommendations(customer_data, prob, pred)
+
         if pred == 1:
-            st.warning(f"{risk} — {len(final_recs)} actions recommended")
+            st.warning(
+                f"{risk} — {len(final_recs)} action(s) recommended"
+            )
             for i, rec in enumerate(final_recs, 1):
                 st.error(f"Action {i}: {rec}")
         else:
@@ -460,7 +549,7 @@ if st.button("Predict Churn Risk", use_container_width=True):
 
         st.divider()
 
-        # PDF Download
+        # PDF
         if modules_loaded:
             try:
                 pdf_bytes = generate_churn_report(
