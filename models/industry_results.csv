@@ -1,1 +1,4 @@
-""
+,Customers,Features,Accuracy,Precision,Recall,F1-Score,AUC,CV_AUC
+Telecom,7043.0,30.0,77.6,57.0,62.8,59.8,83.4,84.6
+Banking,10000.0,11.0,85.8,67.1,58.7,62.6,86.5,86.5
+E-Commerce,5630.0,29.0,94.3,86.2,78.9,82.4,97.3,96.6
