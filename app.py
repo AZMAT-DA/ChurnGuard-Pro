@@ -83,41 +83,58 @@ if st.session_state.logged_in:
 
     st.markdown(f"""
     <div class="welcome-banner">
-        <div class="welcome-name">Welcome back, {st.session_state.full_name}!</div>
+        <div class="welcome-name">
+            Welcome back, {st.session_state.full_name}!
+        </div>
         <div class="welcome-sub">
             ChurnGuard Pro — AI-Powered Customer Retention Platform
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-divider"></div>',
+                unsafe_allow_html=True)
 
     col1, col2 = st.columns([1.6, 1])
 
     with col1:
         st.markdown("""
         <div class="hero-badge">
-            Final Year Project — Multi-Industry Machine Learning Platform
+            Final Year Project — Multi-Industry ML Platform
         </div>
         <div class="hero-title">ChurnGuard Pro</div>
         <div class="hero-subtitle">
-            An intelligent AI platform that predicts customer churn across
-            multiple industries — Telecom, Banking, and E-Commerce.
-            Built with XGBoost, Neural Networks, SHAP explainability,
-            and cross-validated for enterprise reliability.
+            An intelligent AI platform that predicts customer churn
+            across Telecom, Banking, and E-Commerce. Built with
+            XGBoost, Neural Networks, SHAP explainability,
+            GridSearchCV tuning, and cross-validated evaluation.
         </div>
         """, unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="stat-box"><div class="stat-number">3</div><div class="stat-label">Industries supported</div></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="stat-box"><div class="stat-number">3</div>'
+            '<div class="stat-label">Industries supported</div></div>',
+            unsafe_allow_html=True
+        )
         st.markdown("")
-        st.markdown('<div class="stat-box"><div class="stat-number">84%</div><div class="stat-label">Best AUC score</div></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="stat-box"><div class="stat-number">84%</div>'
+            '<div class="stat-label">Best AUC score</div></div>',
+            unsafe_allow_html=True
+        )
         st.markdown("")
-        st.markdown('<div class="stat-box"><div class="stat-number">4</div><div class="stat-label">ML models trained</div></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="stat-box"><div class="stat-number">4</div>'
+            '<div class="stat-label">ML models trained</div></div>',
+            unsafe_allow_html=True
+        )
 
-    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-divider"></div>',
+                unsafe_allow_html=True)
     st.subheader("Navigate to a feature")
 
+    # ---- Row 1 ----
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -125,13 +142,14 @@ if st.session_state.logged_in:
         <div class="feature-card">
             <div class="feature-title">📊 Analytics Dashboard</div>
             <div class="feature-desc">
-                Real-time churn statistics, charts by contract type,
-                internet service, tenure distribution,
-                and model performance comparison.
+                Real-time churn statistics and charts for all 3
+                industries. Telecom, Banking, and E-Commerce tabs
+                with industry-specific visualizations.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/1_Dashboard.py", label="Open Dashboard →")
+        st.page_link("pages/1_Dashboard.py",
+                     label="Open Dashboard →")
 
     with col2:
         st.markdown("""
@@ -140,11 +158,12 @@ if st.session_state.logged_in:
             <div class="feature-desc">
                 Enter customer details and get instant churn prediction
                 with SHAP explanation, smart recommendations,
-                and downloadable PDF report.
+                and a downloadable PDF report.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/2_Predict_Single.py", label="Make Prediction →")
+        st.page_link("pages/2_Predict_Single.py",
+                     label="Make Prediction →")
 
     with col3:
         st.markdown("""
@@ -157,8 +176,10 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/3_Bulk_Upload.py", label="Upload CSV →")
+        st.page_link("pages/3_Bulk_Upload.py",
+                     label="Upload CSV →")
 
+    # ---- Row 2 ----
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -166,13 +187,14 @@ if st.session_state.logged_in:
         <div class="feature-card">
             <div class="feature-title">🤖 Model Report</div>
             <div class="feature-desc">
-                Compare all 4 trained models — Logistic Regression,
-                Random Forest, XGBoost, and Neural Network —
-                with accuracy, recall, F1, and AUC scores.
+                Compare all 4 models across 3 industries.
+                See GridSearchCV best parameters and
+                5-fold cross-validation scores.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/4_Model_Report.py", label="View Models →")
+        st.page_link("pages/4_Model_Report.py",
+                     label="View Models →")
 
     with col2:
         st.markdown("""
@@ -180,14 +202,46 @@ if st.session_state.logged_in:
             <div class="feature-title">📋 My History</div>
             <div class="feature-desc">
                 View all your predictions, filter by risk level,
-                download history as CSV, and track
-                your prediction activity over time.
+                download history as CSV, and track your
+                prediction activity over time.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/5_History.py", label="View History →")
+        st.page_link("pages/5_History.py",
+                     label="View History →")
 
     with col3:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">💰 Revenue Impact</div>
+            <div class="feature-desc">
+                Calculate exactly how much churning customers
+                cost your business per month, per year, and
+                over their lifetime. Get instant ROI calculation.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.page_link("pages/8_Revenue.py",
+                     label="Calculate Revenue →")
+
+    # ---- Row 3 ----
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">🎯 Customer Segments</div>
+            <div class="feature-desc">
+                Group customers into segments like High Value
+                at Risk, Loyal Champions, and New Customers
+                using K-Means clustering.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.page_link("pages/9_Segments.py",
+                     label="View Segments →")
+
+    with col2:
         if st.session_state.role == 'admin':
             st.markdown("""
             <div class="feature-card">
@@ -199,20 +253,38 @@ if st.session_state.logged_in:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            st.page_link("pages/6_Admin.py", label="Open Admin Panel →")
+            st.page_link("pages/6_Admin.py",
+                         label="Open Admin Panel →")
         else:
             st.markdown("""
             <div class="feature-card">
-                <div class="feature-title">ℹ️ About ChurnGuard Pro</div>
+                <div class="feature-title">🏭 Industry Selector</div>
                 <div class="feature-desc">
-                    Built with Python, Streamlit, XGBoost, PyTorch,
-                    and SHAP. Supports Telecom, Banking,
-                    and E-Commerce industries.
+                    View all 3 industry models, check their status,
+                    and see performance comparison across
+                    Telecom, Banking, and E-Commerce.
                 </div>
             </div>
             """, unsafe_allow_html=True)
+            st.page_link("pages/7_Industry_Select.py",
+                         label="Select Industry →")
 
-    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">ℹ️ About ChurnGuard Pro</div>
+            <div class="feature-desc">
+                Built with Python, XGBoost, PyTorch, SHAP,
+                GridSearchCV, SQLite, and ReportLab.
+                Supports Telecom, Banking, E-Commerce.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown('<div class="section-divider"></div>',
+                unsafe_allow_html=True)
+
+    # ---- About section ----
     st.subheader("About ChurnGuard Pro")
 
     col1, col2 = st.columns(2)
@@ -223,16 +295,16 @@ if st.session_state.logged_in:
         ChurnGuard Pro is an AI-powered customer retention platform
         that predicts which customers are likely to leave across
         three industries — Telecom, Banking, and E-Commerce.
-        Instead of losing customers and then wondering why,
-        companies can identify at-risk customers early and
-        take action before they leave.
+        Instead of losing customers and wondering why, companies
+        can identify at-risk customers early and take action
+        before they leave.
 
         **How it works:**
-        The system learns patterns from real customer data.
-        For example in telecom, month-to-month contract customers
-        with high monthly charges are most likely to churn.
-        When you enter a customer's details, the AI applies
-        those learned patterns instantly.
+        The system learns patterns from real customer data using
+        XGBoost trained with GridSearchCV parameter optimization
+        and evaluated with 5-fold cross-validation. SHAP values
+        explain every prediction in plain English. The Revenue
+        Impact Calculator converts predictions into business value.
         """)
 
     with col2:
@@ -240,20 +312,21 @@ if st.session_state.logged_in:
         **Technologies used:**
         - Python 3 — programming language
         - Streamlit — web application framework
-        - XGBoost — best performing ML model (84% AUC)
+        - XGBoost — best performing ML model
         - PyTorch — Neural Network deep learning
         - SHAP — model explainability
+        - GridSearchCV — automatic parameter tuning
+        - Cross-validation — enterprise-grade evaluation
+        - K-Means — customer segmentation clustering
         - SQLite — user database with encrypted passwords
-        - ReportLab — professional PDF report generation
-        - scikit-learn — preprocessing and evaluation
-        - GridSearchCV — automatic hyperparameter tuning
-        - Cross-validation — enterprise-grade model evaluation
+        - ReportLab — professional PDF generation
+        - Deployed on Streamlit Cloud
 
         **Industries:** Telecom, Banking, E-Commerce
-        **Dataset:** Telco Customer Churn (Kaggle) + more
         """)
 
-    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-divider"></div>',
+                unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
@@ -277,20 +350,31 @@ else:
         <div class="hero-badge">
             AI-Powered Multi-Industry Retention Platform
         </div>
-        <div class="hero-title">
-            ChurnGuard Pro
-        </div>
+        <div class="hero-title">ChurnGuard Pro</div>
         <div class="hero-subtitle">
             Predict customer churn across Telecom, Banking,
             and E-Commerce using XGBoost, Neural Networks,
-            and SHAP explainability. Built for enterprise use.
+            SHAP explainability, and GridSearchCV tuning.
+            Built for enterprise use.
         </div>
         """, unsafe_allow_html=True)
 
         c1, c2, c3 = st.columns(3)
-        c1.markdown('<div class="stat-box"><div class="stat-number">84%</div><div class="stat-label">AUC Score</div></div>', unsafe_allow_html=True)
-        c2.markdown('<div class="stat-box"><div class="stat-number">3</div><div class="stat-label">Industries</div></div>', unsafe_allow_html=True)
-        c3.markdown('<div class="stat-box"><div class="stat-number">4</div><div class="stat-label">ML Models</div></div>', unsafe_allow_html=True)
+        c1.markdown(
+            '<div class="stat-box"><div class="stat-number">84%</div>'
+            '<div class="stat-label">AUC Score</div></div>',
+            unsafe_allow_html=True
+        )
+        c2.markdown(
+            '<div class="stat-box"><div class="stat-number">3</div>'
+            '<div class="stat-label">Industries</div></div>',
+            unsafe_allow_html=True
+        )
+        c3.markdown(
+            '<div class="stat-box"><div class="stat-number">4</div>'
+            '<div class="stat-label">ML Models</div></div>',
+            unsafe_allow_html=True
+        )
 
     with col2:
         st.markdown("<br><br>", unsafe_allow_html=True)
@@ -300,18 +384,24 @@ else:
         tab1, tab2 = st.tabs(["Sign In", "Create Account"])
 
         with tab1:
-            login_user_input = st.text_input(
-                "Username", placeholder="Enter your username", key="li_user"
+            login_username = st.text_input(
+                "Username",
+                placeholder="Enter your username",
+                key="li_user"
             )
             login_pass = st.text_input(
-                "Password", type="password",
-                placeholder="Enter your password", key="li_pass"
+                "Password",
+                type="password",
+                placeholder="Enter your password",
+                key="li_pass"
             )
-            if st.button("Sign In", use_container_width=True, key="login_btn"):
-                if not login_user_input or not login_pass:
+            if st.button("Sign In",
+                         use_container_width=True,
+                         key="login_btn"):
+                if not login_username or not login_pass:
                     st.error("Please enter both username and password.")
                 else:
-                    result = login_user(login_user_input, login_pass)
+                    result = login_user(login_username, login_pass)
                     if result['success']:
                         st.session_state.logged_in = True
                         st.session_state.user_id   = result['user_id']
@@ -321,31 +411,55 @@ else:
                         st.rerun()
                     else:
                         st.error(result['error'])
-            st.caption("Default admin: username = admin | password = 1234")
+            st.caption(
+                "Default admin: username = admin | password = 1234"
+            )
 
         with tab2:
-            reg_name  = st.text_input("Full name",
-                placeholder="e.g. Ahmed Khan", key="reg_name")
-            reg_email = st.text_input("Email",
-                placeholder="e.g. ahmed@email.com", key="reg_email")
-            reg_user  = st.text_input("Username",
-                placeholder="Choose a unique username", key="reg_user")
-            reg_pass  = st.text_input("Password", type="password",
-                placeholder="Minimum 6 characters", key="reg_pass")
-            reg_pass2 = st.text_input("Confirm password", type="password",
-                placeholder="Repeat your password", key="reg_pass2")
+            reg_name  = st.text_input(
+                "Full name",
+                placeholder="e.g. Ahmed Khan",
+                key="reg_name"
+            )
+            reg_email = st.text_input(
+                "Email",
+                placeholder="e.g. ahmed@email.com",
+                key="reg_email"
+            )
+            reg_user  = st.text_input(
+                "Username",
+                placeholder="Choose a unique username",
+                key="reg_user"
+            )
+            reg_pass  = st.text_input(
+                "Password",
+                type="password",
+                placeholder="Minimum 6 characters",
+                key="reg_pass"
+            )
+            reg_pass2 = st.text_input(
+                "Confirm password",
+                type="password",
+                placeholder="Repeat your password",
+                key="reg_pass2"
+            )
 
             if st.button("Create Account",
-                         use_container_width=True, key="register_btn"):
+                         use_container_width=True,
+                         key="register_btn"):
                 if not all([reg_name, reg_email,
                             reg_user, reg_pass, reg_pass2]):
                     st.error("Please fill in all fields.")
                 elif len(reg_pass) < 6:
-                    st.error("Password must be at least 6 characters.")
+                    st.error(
+                        "Password must be at least 6 characters."
+                    )
                 elif reg_pass != reg_pass2:
                     st.error("Passwords do not match.")
                 elif '@' not in reg_email:
-                    st.error("Please enter a valid email address.")
+                    st.error(
+                        "Please enter a valid email address."
+                    )
                 else:
                     result = register_user(
                         reg_name, reg_email, reg_user, reg_pass
