@@ -1,4 +1,4 @@
-# pages/2_Predict_Single.py — Multi-industry prediction FULLY FIXED
+# pages/2_Predict_Single.py — Multi-industry prediction with SHAP all industries
 
 import streamlit as st
 import pandas as pd
@@ -359,210 +359,64 @@ if st.button("Predict Churn Risk", use_container_width=True):
         st.divider()
 
         # ================================================
-        # SHAP — TELECOM ONLY
+        # SHAP EXPLANATION — ALL 3 INDUSTRIES
         # ================================================
         final_recs = []
 
-        if selected == 'telecom':
-            try:
-                import shap
-                import io
-                import matplotlib
-                matplotlib.use('Agg')
-                import matplotlib.pyplot as plt
-                from matplotlib.patches import Patch
+        try:
+            from shap_explainer import (get_shap_explanation,
+                                        plot_shap_bar,
+                                        get_shap_recommendations)
 
-                shap_explainer_obj = shap.TreeExplainer(model)
-                sv                 = shap_explainer_obj.shap_values(
-                    input_row
-                )
-                sv_series = pd.Series(sv[0], index=feature_names)
-                sorted_sv = sv_series.reindex(
-                    sv_series.abs().sort_values(ascending=False).index
-                )
-                risk_inc  = sorted_sv[sorted_sv > 0].head(5)
-                risk_dec  = sorted_sv[sorted_sv < 0].head(5)
-
-                st.subheader("Why did the model predict this?")
-                top8        = sorted_sv.head(8)
-                clean_names = [
-                    n.replace('_', ' ')[:30] for n in top8.index
-                ]
-                vals   = top8.values
-                colors = [
-                    '#E24B4A' if v > 0 else '#1A7A4A' for v in vals
-                ]
-                fig, ax = plt.subplots(figsize=(8, 5))
-                ax.barh(range(len(clean_names)), vals,
-                        color=colors, alpha=0.85, height=0.6)
-                ax.set_yticks(range(len(clean_names)))
-                ax.set_yticklabels(clean_names, fontsize=10)
-                ax.axvline(x=0, color='gray', linewidth=0.8)
-                ax.set_xlabel('SHAP value', fontsize=10)
-                ax.set_title('Why did the model predict this?',
-                             fontsize=12, fontweight='bold')
-                legend = [
-                    Patch(color='#E24B4A', alpha=0.85,
-                          label='Increases churn risk'),
-                    Patch(color='#1A7A4A', alpha=0.85,
-                          label='Decreases churn risk')
-                ]
-                ax.legend(handles=legend,
-                          loc='lower right', fontsize=9)
-                ax.invert_yaxis()
-                plt.tight_layout()
-                buf = io.BytesIO()
-                plt.savefig(buf, format='png', dpi=130,
-                            bbox_inches='tight')
-                buf.seek(0)
-                plt.close()
-                st.image(buf.getvalue(), use_container_width=True)
-                st.caption(
-                    "Red = increases churn | Green = decreases churn"
+            with st.spinner("Calculating SHAP explanation..."):
+                shap_exp   = get_shap_explanation(model, input_row)
+                shap_chart = plot_shap_bar(shap_exp)
+                shap_recs  = get_shap_recommendations(
+                    shap_exp, pred, selected
                 )
 
-                st.divider()
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.markdown("**Factors increasing risk:**")
+            st.subheader("Why did the model predict this?")
+            st.image(shap_chart, use_container_width=True)
+            st.caption(
+                "Red bars = factors pushing toward churn. "
+                "Green bars = factors keeping customer loyal. "
+                "Longer bar = stronger impact on prediction."
+            )
+
+            st.divider()
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**Factors increasing churn risk:**")
+                risk_inc = shap_exp['risk_increasers']
+                if len(risk_inc) > 0:
                     for feat, val in risk_inc.head(3).items():
-                        st.error(
-                            f"↑ {feat.replace('_',' ')[:30]}"
-                            f"  (+{val:.3f})"
-                        )
-                with col2:
-                    st.markdown("**Factors reducing risk:**")
+                        clean = feat.replace('_', ' ')[:32]
+                        st.error(f"↑ {clean}  (+{val:.3f})")
+                else:
+                    st.info("No strong risk-increasing factors.")
+
+            with col2:
+                st.markdown("**Factors reducing churn risk:**")
+                risk_dec = shap_exp['risk_decreasers']
+                if len(risk_dec) > 0:
                     for feat, val in risk_dec.head(3).items():
-                        st.success(
-                            f"↓ {feat.replace('_',' ')[:30]}"
-                            f"  ({val:.3f})"
-                        )
+                        clean = feat.replace('_', ' ')[:32]
+                        st.success(f"↓ {clean}  ({val:.3f})")
+                else:
+                    st.info("No strong risk-reducing factors.")
 
-                # SHAP-based recommendations
-                for feat, val in risk_inc.items():
-                    pct = round(abs(val) * 100, 1)
-                    if 'Contract' in feat:
-                        final_recs.append(
-                            f"Contract type is a top churn driver "
-                            f"(+{pct}% risk). "
-                            "Offer upgrade with 20% discount."
-                        )
-                    elif 'tenure' in feat.lower():
-                        final_recs.append(
-                            f"Short tenure increases risk (+{pct}%). "
-                            "Assign onboarding support agent."
-                        )
-                    elif 'MonthlyCharges' in feat:
-                        final_recs.append(
-                            f"High charges driving churn (+{pct}%). "
-                            "Offer 10-15% bill reduction bundle."
-                        )
-                    elif 'Fiber' in feat:
-                        final_recs.append(
-                            f"Fiber optic is a risk factor (+{pct}%). "
-                            "Check service quality proactively."
-                        )
-                    elif 'Electronic check' in feat:
-                        final_recs.append(
-                            f"Electronic check increases risk (+{pct}%). "
-                            "Suggest switching to auto-payment."
-                        )
+            final_recs = shap_recs
 
-            except Exception as shap_e:
-                st.info(f"SHAP chart unavailable: {shap_e}")
-                if modules_loaded:
-                    final_recs = get_recommendations(
-                        customer_data, prob, pred
-                    )
-
-        # ================================================
-        # BANKING RECOMMENDATIONS
-        # ================================================
-        elif selected == 'banking':
-            if pred == 1:
-                if num_products >= 3:
-                    final_recs.append(
-                        "Customer has 3+ products which increases churn. "
-                        "Review product fit and simplify offering."
-                    )
-                if age > 45:
-                    final_recs.append(
-                        "Older customer needs dedicated relationship manager. "
-                        "Schedule personal review call."
-                    )
-                if is_active == "No":
-                    final_recs.append(
-                        "Inactive member — send re-engagement campaign "
-                        "with exclusive offer."
-                    )
-                if geography == "Germany":
-                    final_recs.append(
-                        "Germany has highest churn rate. "
-                        "Offer region-specific loyalty program."
-                    )
-                if balance == 0:
-                    final_recs.append(
-                        "Zero balance account — customer may already "
-                        "be disengaging. Offer incentive to deposit."
-                    )
-                if not final_recs:
-                    final_recs.append(
-                        "Schedule personal customer review and "
-                        "offer loyalty package."
-                    )
-            else:
-                final_recs.append(
-                    "Customer shows low churn risk. "
-                    "Maintain current service quality."
-                )
-                final_recs.append(
-                    "Consider upsell — satisfied customer may "
-                    "welcome premium product offer."
+        except Exception as shap_e:
+            st.info(f"SHAP unavailable: {shap_e}")
+            if modules_loaded:
+                final_recs = get_recommendations(
+                    customer_data, prob, pred
                 )
 
         # ================================================
-        # ECOMMERCE RECOMMENDATIONS
-        # ================================================
-        elif selected == 'ecommerce':
-            if pred == 1:
-                if complain == "Yes":
-                    final_recs.append(
-                        "Customer has filed complaint — resolve immediately "
-                        "and offer compensation coupon."
-                    )
-                if satisfaction <= 2:
-                    final_recs.append(
-                        f"Low satisfaction score ({satisfaction}/5). "
-                        "Send personal apology and discount voucher."
-                    )
-                if tenure_e < 6:
-                    final_recs.append(
-                        "New customer (under 6 months). "
-                        "Assign dedicated support and welcome rewards."
-                    )
-                if hours_app < 2:
-                    final_recs.append(
-                        "Low app engagement. Send push notification "
-                        "with personalized product recommendations."
-                    )
-                if not final_recs:
-                    final_recs.append(
-                        "Send personalized retention offer with "
-                        "cashback increase and free shipping."
-                    )
-            else:
-                final_recs.append(
-                    "Customer is satisfied. Maintain service level "
-                    "and consider loyalty rewards."
-                )
-                if satisfaction >= 4:
-                    final_recs.append(
-                        "High satisfaction customer — ask for a review "
-                        "and refer-a-friend program."
-                    )
-
-        # ================================================
-        # SHOW RECOMMENDATIONS
+        # RECOMMENDATIONS
         # ================================================
         st.divider()
         st.subheader("Smart Recommendations")
