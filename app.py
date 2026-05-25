@@ -382,17 +382,17 @@ else:
         c1.markdown(
             '<div class="stat-box"><div class="stat-number">84%</div>'
             '<div class="stat-label">AUC Score</div></div>',
-            uuid="v_auc", unsafe_allow_html=True
+            unsafe_allow_html=True
         )
         c2.markdown(
             '<div class="stat-box"><div class="stat-number">3</div>'
             '<div class="stat-label">Industries</div></div>',
-            uuid="v_ind", unsafe_allow_html=True
+            unsafe_allow_html=True
         )
         c3.markdown(
             '<div class="stat-box"><div class="stat-number">5</div>'
             '<div class="stat-label">ML Engines</div></div>',
-            uuid="v_mod", unsafe_allow_html=True
+            unsafe_allow_html=True
         )
 
     with col2:
