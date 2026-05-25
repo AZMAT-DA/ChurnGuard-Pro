@@ -92,8 +92,7 @@ if st.session_state.logged_in:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-divider"></div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns([1.6, 1])
 
@@ -130,8 +129,7 @@ if st.session_state.logged_in:
             unsafe_allow_html=True
         )
 
-    st.markdown('<div class="section-divider"></div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
     st.subheader("Navigate to a feature")
 
     # ---- Row 1 ----
@@ -148,8 +146,7 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/1_Dashboard.py",
-                     label="Open Dashboard →")
+        st.page_link("pages/1_Dashboard.py", label="Open Dashboard →")
 
     with col2:
         st.markdown("""
@@ -162,8 +159,7 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/2_Predict_Single.py",
-                     label="Make Prediction →")
+        st.page_link("pages/2_Predict_Single.py", label="Make Prediction →")
 
     with col3:
         st.markdown("""
@@ -176,8 +172,7 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/3_Bulk_Upload.py",
-                     label="Upload CSV →")
+        st.page_link("pages/3_Bulk_Upload.py", label="Upload CSV →")
 
     # ---- Row 2 ----
     col1, col2, col3 = st.columns(3)
@@ -193,8 +188,7 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/4_Model_Report.py",
-                     label="View Models →")
+        st.page_link("pages/4_Model_Report.py", label="View Models →")
 
     with col2:
         st.markdown("""
@@ -207,8 +201,7 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/5_History.py",
-                     label="View History →")
+        st.page_link("pages/5_History.py", label="View History →")
 
     with col3:
         st.markdown("""
@@ -221,7 +214,7 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/pages/8_Revenue.py", label="Calculate Revenue →")
+        st.page_link("pages/8_Revenue.py", label="Calculate Revenue →")
 
     # ---- Row 3 ----
     col1, col2, col3 = st.columns(3)
@@ -237,7 +230,7 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/pages/9_Segments.py", label="View Segments →")
+        st.page_link("pages/9_Segments.py", label="View Segments →")
 
     with col2:
         if st.session_state.role == 'admin':
@@ -251,8 +244,7 @@ if st.session_state.logged_in:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            st.page_link("pages/6_Admin.py",
-                         label="Open Admin Panel →")
+            st.page_link("pages/6_Admin.py", label="Open Admin Panel →")
         else:
             st.markdown("""
             <div class="feature-card">
@@ -264,8 +256,7 @@ if st.session_state.logged_in:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            st.page_link("pages/7_Industry_Select.py",
-                         label="Select Industry →")
+            st.page_link("pages/7_Industry_Select.py", label="Select Industry →")
 
     with col3:
         st.markdown("""
@@ -279,8 +270,7 @@ if st.session_state.logged_in:
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-divider"></div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
     # ---- About section ----
     st.subheader("About ChurnGuard Pro")
@@ -323,17 +313,16 @@ if st.session_state.logged_in:
         **Industries:** Telecom, Banking, E-Commerce
         """)
 
-    st.markdown('<div class="section-divider"></div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("Logout", use_container_width=True):
-            for key in ['logged_in', 'user_id',
-                        'username', 'full_name', 'role']:
-                st.session_state[key] = (
-                    False if key == 'logged_in' else ''
-                )
+            st.session_state.logged_in = False
+            st.session_state.user_id = None
+            st.session_state.username = ''
+            st.session_state.full_name = ''
+            st.session_state.role = ''
             st.rerun()
 
 # ================================================
@@ -393,9 +382,7 @@ else:
                 placeholder="Enter your password",
                 key="li_pass"
             )
-            if st.button("Sign In",
-                         use_container_width=True,
-                         key="login_btn"):
+            if st.button("Sign In", use_container_width=True, key="login_btn"):
                 if not login_username or not login_pass:
                     st.error("Please enter both username and password.")
                 else:
@@ -442,30 +429,18 @@ else:
                 key="reg_pass2"
             )
 
-            if st.button("Create Account",
-                         use_container_width=True,
-                         key="register_btn"):
-                if not all([reg_name, reg_email,
-                            reg_user, reg_pass, reg_pass2]):
+            if st.button("Create Account", use_container_width=True, key="register_btn"):
+                if not all([reg_name, reg_email, reg_user, reg_pass, reg_pass2]):
                     st.error("Please fill in all fields.")
                 elif len(reg_pass) < 6:
-                    st.error(
-                        "Password must be at least 6 characters."
-                    )
+                    st.error("Password must be at least 6 characters.")
                 elif reg_pass != reg_pass2:
                     st.error("Passwords do not match.")
                 elif '@' not in reg_email:
-                    st.error(
-                        "Please enter a valid email address."
-                    )
+                    st.error("Please enter a valid email address.")
                 else:
-                    result = register_user(
-                        reg_name, reg_email, reg_user, reg_pass
-                    )
+                    result = register_user(reg_name, reg_email, reg_user, reg_pass)
                     if result['success']:
-                        st.success(
-                            "Account created! "
-                            "Please sign in using the Sign In tab."
-                        )
+                        st.success("Account created! Please sign in using the Sign In tab.")
                     else:
                         st.error(result['error'])
