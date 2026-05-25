@@ -146,7 +146,10 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/1_Dashboard.py", label="Open Dashboard →")
+        try:
+            st.page_link("pages/1_Dashboard.py", label="Open Dashboard →")
+        except Exception:
+            st.warning("⚠️ pages/1_Dashboard.py missing")
 
     with col2:
         st.markdown("""
@@ -159,7 +162,10 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/2_Predict_Single.py", label="Make Prediction →")
+        try:
+            st.page_link("pages/2_Predict_Single.py", label="Make Prediction →")
+        except Exception:
+            st.warning("⚠️ pages/2_Predict_Single.py missing")
 
     with col3:
         st.markdown("""
@@ -172,7 +178,10 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/3_Bulk_Upload.py", label="Upload CSV →")
+        try:
+            st.page_link("pages/3_Bulk_Upload.py", label="Upload CSV →")
+        except Exception:
+            st.warning("⚠️ pages/3_Bulk_Upload.py missing")
 
     # ---- Row 2 ----
     col1, col2, col3 = st.columns(3)
@@ -188,7 +197,10 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/4_Model_Report.py", label="View Models →")
+        try:
+            st.page_link("pages/4_Model_Report.py", label="View Models →")
+        except Exception:
+            st.warning("⚠️ pages/4_Model_Report.py missing")
 
     with col2:
         st.markdown("""
@@ -201,7 +213,10 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/5_History.py", label="View History →")
+        try:
+            st.page_link("pages/5_History.py", label="View History →")
+        except Exception:
+            st.warning("⚠️ pages/5_History.py missing")
 
     with col3:
         st.markdown("""
@@ -214,7 +229,10 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/8_Revenue.py", label="Calculate Revenue →")
+        try:
+            st.page_link("pages/8_Revenue.py", label="Calculate Revenue →")
+        except Exception:
+            st.warning("⚠️ pages/8_Revenue.py missing")
 
     # ---- Row 3 ----
     col1, col2, col3 = st.columns(3)
@@ -230,7 +248,10 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/9_Segments.py", label="View Segments →")
+        try:
+            st.page_link("pages/9_Segments.py", label="View Segments →")
+        except Exception:
+            st.warning("⚠️ pages/9_Segments.py missing")
 
     with col2:
         if st.session_state.role == 'admin':
@@ -244,7 +265,10 @@ if st.session_state.logged_in:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            st.page_link("pages/6_Admin.py", label="Open Admin Panel →")
+            try:
+                st.page_link("pages/6_Admin.py", label="Open Admin Panel →")
+            except Exception:
+                st.warning("⚠️ pages/6_Admin.py missing")
         else:
             st.markdown("""
             <div class="feature-card">
@@ -256,7 +280,10 @@ if st.session_state.logged_in:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            st.page_link("pages/7_Industry_Select.py", label="Select Industry →")
+            try:
+                st.page_link("pages/7_Industry_Select.py", label="Select Industry →")
+            except Exception:
+                st.warning("⚠️ pages/7_Industry_Select.py missing")
 
     with col3:
         st.markdown("""
