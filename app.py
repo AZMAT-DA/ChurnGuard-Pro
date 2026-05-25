@@ -124,8 +124,8 @@ if st.session_state.logged_in:
         )
         st.markdown("")
         st.markdown(
-            '<div class="stat-box"><div class="stat-number">4</div>'
-            '<div class="stat-label">ML models trained</div></div>',
+            '<div class="stat-box"><div class="stat-number">5</div>'
+            '<div class="stat-label">ML models & Engines</div></div>',
             unsafe_allow_html=True
         )
 
@@ -191,7 +191,7 @@ if st.session_state.logged_in:
         <div class="feature-card">
             <div class="feature-title">🤖 Model Report</div>
             <div class="feature-desc">
-                Compare all 4 models across 3 industries.
+                Compare all models across 3 industries.
                 See GridSearchCV best parameters and
                 5-fold cross-validation scores.
             </div>
@@ -225,7 +225,7 @@ if st.session_state.logged_in:
             <div class="feature-desc">
                 Calculate exactly how much churning customers
                 cost your business per month, per year, and
-                over their lifetime. Get instant ROI calculation.
+                over their lifetime. Get instant ROI calculations.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -244,7 +244,7 @@ if st.session_state.logged_in:
             <div class="feature-desc">
                 Group customers into segments like High Value
                 at Risk, Loyal Champions, and New Customers
-                using K-Means clustering.
+                using unsupervised K-Means clustering.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -254,6 +254,22 @@ if st.session_state.logged_in:
             st.warning("⚠️ pages/9_Segments.py missing")
 
     with col2:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">📧 Email Alert System</div>
+            <div class="feature-desc">
+                Automate notifications. Set up secure SMTP options
+                to auto-notify teams when high risk churn customer 
+                thresholds are violated.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        try:
+            st.page_link("pages/10_Email_Alerts.py", label="Configure Alerts →")
+        except Exception:
+            st.warning("⚠️ pages/10_Email_Alerts.py missing")
+
+    with col3:
         if st.session_state.role == 'admin':
             st.markdown("""
             <div class="feature-card">
@@ -284,18 +300,6 @@ if st.session_state.logged_in:
                 st.page_link("pages/7_Industry_Select.py", label="Select Industry →")
             except Exception:
                 st.warning("⚠️ pages/7_Industry_Select.py missing")
-
-    with col3:
-        st.markdown("""
-        <div class="feature-card">
-            <div class="feature-title">ℹ️ About ChurnGuard Pro</div>
-            <div class="feature-desc">
-                Built with Python, XGBoost, PyTorch, SHAP,
-                GridSearchCV, SQLite, and ReportLab.
-                Supports Telecom, Banking, E-Commerce.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
 
     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
@@ -333,6 +337,7 @@ if st.session_state.logged_in:
         - GridSearchCV — automatic parameter tuning
         - Cross-validation — enterprise-grade evaluation
         - K-Means — customer segmentation clustering
+        - smtplib — automated email warning broadcast network
         - SQLite — user database with encrypted passwords
         - ReportLab — professional PDF generation
         - Deployed on Streamlit Cloud
@@ -377,17 +382,17 @@ else:
         c1.markdown(
             '<div class="stat-box"><div class="stat-number">84%</div>'
             '<div class="stat-label">AUC Score</div></div>',
-            unsafe_allow_html=True
+            uuid="v_auc", unsafe_allow_html=True
         )
         c2.markdown(
             '<div class="stat-box"><div class="stat-number">3</div>'
             '<div class="stat-label">Industries</div></div>',
-            unsafe_allow_html=True
+            uuid="v_ind", unsafe_allow_html=True
         )
         c3.markdown(
-            '<div class="stat-box"><div class="stat-number">4</div>'
-            '<div class="stat-label">ML Models</div></div>',
-            unsafe_allow_html=True
+            '<div class="stat-box"><div class="stat-number">5</div>'
+            '<div class="stat-label">ML Engines</div></div>',
+            uuid="v_mod", unsafe_allow_html=True
         )
 
     with col2:
