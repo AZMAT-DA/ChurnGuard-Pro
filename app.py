@@ -221,8 +221,7 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/8_Revenue.py",
-                     label="Calculate Revenue →")
+        st.page_link("pages/pages/8_Revenue.py", label="Calculate Revenue →")
 
     # ---- Row 3 ----
     col1, col2, col3 = st.columns(3)
@@ -238,8 +237,7 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link("pages/9_Segments.py",
-                     label="View Segments →")
+        st.page_link("pages/pages/9_Segments.py", label="View Segments →")
 
     with col2:
         if st.session_state.role == 'admin':
