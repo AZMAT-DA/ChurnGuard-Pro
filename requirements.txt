@@ -13,3 +13,6 @@ pillow
 bcrypt
 shap
 openpyxl
+fastapi
+uvicorn
+python-multipart

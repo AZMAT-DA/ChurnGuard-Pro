@@ -92,7 +92,8 @@ if st.session_state.logged_in:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-divider"></div>',
+                unsafe_allow_html=True)
 
     col1, col2 = st.columns([1.6, 1])
 
@@ -106,7 +107,7 @@ if st.session_state.logged_in:
             An intelligent AI platform that predicts customer churn
             across Telecom, Banking, and E-Commerce. Built with
             XGBoost, Neural Networks, SHAP explainability,
-            GridSearchCV tuning, and cross-validated evaluation.
+            GridSearchCV tuning, REST API, and model retraining.
         </div>
         """, unsafe_allow_html=True)
 
@@ -124,12 +125,13 @@ if st.session_state.logged_in:
         )
         st.markdown("")
         st.markdown(
-            '<div class="stat-box"><div class="stat-number">5</div>'
-            '<div class="stat-label">ML models & Engines</div></div>',
+            '<div class="stat-box"><div class="stat-number">4</div>'
+            '<div class="stat-label">ML models trained</div></div>',
             unsafe_allow_html=True
         )
 
-    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-divider"></div>',
+                unsafe_allow_html=True)
     st.subheader("Navigate to a feature")
 
     # ---- Row 1 ----
@@ -140,32 +142,28 @@ if st.session_state.logged_in:
         <div class="feature-card">
             <div class="feature-title">📊 Analytics Dashboard</div>
             <div class="feature-desc">
-                Real-time churn statistics and charts for all 3
-                industries. Telecom, Banking, and E-Commerce tabs
-                with industry-specific visualizations.
+                Real-time churn statistics for all 3 industries.
+                Telecom, Banking, and E-Commerce tabs with
+                industry-specific charts and insights.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        try:
-            st.page_link("pages/1_Dashboard.py", label="Open Dashboard →")
-        except Exception:
-            st.warning("⚠️ pages/1_Dashboard.py missing")
+        st.page_link("pages/1_Dashboard.py",
+                     label="Open Dashboard →")
 
     with col2:
         st.markdown("""
         <div class="feature-card">
             <div class="feature-title">🔍 Predict Single Customer</div>
             <div class="feature-desc">
-                Enter customer details and get instant churn prediction
-                with SHAP explanation, smart recommendations,
-                and a downloadable PDF report.
+                Enter customer details and get instant churn
+                prediction with SHAP explanation, smart
+                recommendations, and PDF report.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        try:
-            st.page_link("pages/2_Predict_Single.py", label="Make Prediction →")
-        except Exception:
-            st.warning("⚠️ pages/2_Predict_Single.py missing")
+        st.page_link("pages/2_Predict_Single.py",
+                     label="Make Prediction →")
 
     with col3:
         st.markdown("""
@@ -178,10 +176,8 @@ if st.session_state.logged_in:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        try:
-            st.page_link("pages/3_Bulk_Upload.py", label="Upload CSV →")
-        except Exception:
-            st.warning("⚠️ pages/3_Bulk_Upload.py missing")
+        st.page_link("pages/3_Bulk_Upload.py",
+                     label="Upload CSV →")
 
     # ---- Row 2 ----
     col1, col2, col3 = st.columns(3)
@@ -191,16 +187,14 @@ if st.session_state.logged_in:
         <div class="feature-card">
             <div class="feature-title">🤖 Model Report</div>
             <div class="feature-desc">
-                Compare all models across 3 industries.
+                Compare all 4 models across 3 industries.
                 See GridSearchCV best parameters and
                 5-fold cross-validation scores.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        try:
-            st.page_link("pages/4_Model_Report.py", label="View Models →")
-        except Exception:
-            st.warning("⚠️ pages/4_Model_Report.py missing")
+        st.page_link("pages/4_Model_Report.py",
+                     label="View Models →")
 
     with col2:
         st.markdown("""
@@ -209,14 +203,12 @@ if st.session_state.logged_in:
             <div class="feature-desc">
                 View all your predictions, filter by risk level,
                 download history as CSV, and track your
-                prediction activity over time.
+                activity over time.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        try:
-            st.page_link("pages/5_History.py", label="View History →")
-        except Exception:
-            st.warning("⚠️ pages/5_History.py missing")
+        st.page_link("pages/5_History.py",
+                     label="View History →")
 
     with col3:
         st.markdown("""
@@ -225,14 +217,12 @@ if st.session_state.logged_in:
             <div class="feature-desc">
                 Calculate exactly how much churning customers
                 cost your business per month, per year, and
-                over their lifetime. Get instant ROI calculations.
+                over their lifetime with instant ROI.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        try:
-            st.page_link("pages/8_Revenue.py", label="Calculate Revenue →")
-        except Exception:
-            st.warning("⚠️ pages/8_Revenue.py missing")
+        st.page_link("pages/8_Revenue.py",
+                     label="Calculate Revenue →")
 
     # ---- Row 3 ----
     col1, col2, col3 = st.columns(3)
@@ -243,34 +233,51 @@ if st.session_state.logged_in:
             <div class="feature-title">🎯 Customer Segments</div>
             <div class="feature-desc">
                 Group customers into segments like High Value
-                at Risk, Loyal Champions, and New Customers
-                using unsupervised K-Means clustering.
+                at Risk and Loyal Champions using K-Means
+                clustering with action recommendations.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        try:
-            st.page_link("pages/9_Segments.py", label="View Segments →")
-        except Exception:
-            st.warning("⚠️ pages/9_Segments.py missing")
+        st.page_link("pages/9_Segments.py",
+                     label="View Segments →")
 
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-title">📧 Email Alert System</div>
+            <div class="feature-title">📧 Email Alerts</div>
             <div class="feature-desc">
-                Automate notifications. Set up secure SMTP options
-                to auto-notify teams when high risk churn customer 
-                thresholds are violated.
+                Automatically notify your retention team
+                when high-risk churn customers are detected.
+                Configure Gmail and send instant alerts.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        try:
-            st.page_link("pages/10_Email_Alerts.py", label="Configure Alerts →")
-        except Exception:
-            st.warning("⚠️ pages/10_Email_Alerts.py missing")
+        st.page_link("pages/10_Email_Alerts.py",
+                     label="Setup Alerts →")
 
     with col3:
-        if st.session_state.role == 'admin':
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">🏭 Industry Selector</div>
+            <div class="feature-desc">
+                View all 3 industry models, check their status,
+                and see performance comparison across
+                Telecom, Banking, and E-Commerce.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.page_link("pages/7_Industry_Select.py",
+                     label="Select Industry →")
+
+    # ---- Row 4 — Admin features ----
+    if st.session_state.role == 'admin':
+        st.markdown('<div class="section-divider"></div>',
+                    unsafe_allow_html=True)
+        st.subheader("Admin Features")
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
             st.markdown("""
             <div class="feature-card">
                 <div class="feature-title">⚙️ Admin Panel</div>
@@ -281,27 +288,43 @@ if st.session_state.logged_in:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            try:
-                st.page_link("pages/6_Admin.py", label="Open Admin Panel →")
-            except Exception:
-                st.warning("⚠️ pages/6_Admin.py missing")
-        else:
+            st.page_link("pages/6_Admin.py",
+                         label="Open Admin Panel →")
+
+        with col2:
             st.markdown("""
             <div class="feature-card">
-                <div class="feature-title">🏭 Industry Selector</div>
+                <div class="feature-title">🔄 Model Retraining</div>
                 <div class="feature-desc">
-                    View all 3 industry models, check their status,
-                    and see performance comparison across
-                    Telecom, Banking, and E-Commerce.
+                    Upload new customer data and retrain models
+                    automatically. System preprocesses, trains,
+                    evaluates with cross-validation, and saves.
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            try:
-                st.page_link("pages/7_Industry_Select.py", label="Select Industry →")
-            except Exception:
-                st.warning("⚠️ pages/7_Industry_Select.py missing")
+            st.page_link("pages/Retrain.py",
+                         label="Retrain Models →")
 
-    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+        with col3:
+            st.markdown("""
+            <div class="feature-card">
+                <div class="feature-title">🌐 REST API</div>
+                <div class="feature-desc">
+                    ChurnGuard Pro exposes a REST API so any
+                    CRM or external system can get predictions
+                    without opening the app.
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("""
+            <div style='font-size:0.85rem; color:#4A5568; margin-top:8px;'>
+            Run locally: <code>uvicorn api:app --port 8000</code><br>
+            Then open: <code>localhost:8000/docs</code>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown('<div class="section-divider"></div>',
+                unsafe_allow_html=True)
 
     # ---- About section ----
     st.subheader("About ChurnGuard Pro")
@@ -314,16 +337,16 @@ if st.session_state.logged_in:
         ChurnGuard Pro is an AI-powered customer retention platform
         that predicts which customers are likely to leave across
         three industries — Telecom, Banking, and E-Commerce.
-        Instead of losing customers and wondering why, companies
-        can identify at-risk customers early and take action
-        before they leave.
+        It helps companies identify at-risk customers early
+        and take action before they leave.
 
         **How it works:**
         The system learns patterns from real customer data using
         XGBoost trained with GridSearchCV parameter optimization
         and evaluated with 5-fold cross-validation. SHAP values
-        explain every prediction in plain English. The Revenue
-        Impact Calculator converts predictions into business value.
+        explain every prediction. The Revenue Impact Calculator
+        converts predictions into business value. The REST API
+        lets any external system use the models directly.
         """)
 
     with col2:
@@ -331,30 +354,33 @@ if st.session_state.logged_in:
         **Technologies used:**
         - Python 3 — programming language
         - Streamlit — web application framework
-        - XGBoost — best performing ML model
+        - XGBoost — best performing ML model (84% AUC)
         - PyTorch — Neural Network deep learning
         - SHAP — model explainability
         - GridSearchCV — automatic parameter tuning
         - Cross-validation — enterprise-grade evaluation
         - K-Means — customer segmentation clustering
-        - smtplib — automated email warning broadcast network
+        - FastAPI — REST API framework
         - SQLite — user database with encrypted passwords
         - ReportLab — professional PDF generation
         - Deployed on Streamlit Cloud
 
         **Industries:** Telecom, Banking, E-Commerce
+        **API Docs:** Run `uvicorn api:app --port 8000`
+        then open `localhost:8000/docs`
         """)
 
-    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-divider"></div>',
+                unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("Logout", use_container_width=True):
-            st.session_state.logged_in = False
-            st.session_state.user_id = None
-            st.session_state.username = ''
-            st.session_state.full_name = ''
-            st.session_state.role = ''
+            for key in ['logged_in', 'user_id',
+                        'username', 'full_name', 'role']:
+                st.session_state[key] = (
+                    False if key == 'logged_in' else ''
+                )
             st.rerun()
 
 # ================================================
@@ -373,7 +399,7 @@ else:
         <div class="hero-subtitle">
             Predict customer churn across Telecom, Banking,
             and E-Commerce using XGBoost, Neural Networks,
-            SHAP explainability, and GridSearchCV tuning.
+            SHAP, GridSearchCV, and a production REST API.
             Built for enterprise use.
         </div>
         """, unsafe_allow_html=True)
@@ -390,8 +416,8 @@ else:
             unsafe_allow_html=True
         )
         c3.markdown(
-            '<div class="stat-box"><div class="stat-number">5</div>'
-            '<div class="stat-label">ML Engines</div></div>',
+            '<div class="stat-box"><div class="stat-number">4</div>'
+            '<div class="stat-label">ML Models</div></div>',
             unsafe_allow_html=True
         )
 
@@ -414,9 +440,13 @@ else:
                 placeholder="Enter your password",
                 key="li_pass"
             )
-            if st.button("Sign In", use_container_width=True, key="login_btn"):
+            if st.button("Sign In",
+                         use_container_width=True,
+                         key="login_btn"):
                 if not login_username or not login_pass:
-                    st.error("Please enter both username and password.")
+                    st.error(
+                        "Please enter both username and password."
+                    )
                 else:
                     result = login_user(login_username, login_pass)
                     if result['success']:
@@ -461,18 +491,30 @@ else:
                 key="reg_pass2"
             )
 
-            if st.button("Create Account", use_container_width=True, key="register_btn"):
-                if not all([reg_name, reg_email, reg_user, reg_pass, reg_pass2]):
+            if st.button("Create Account",
+                         use_container_width=True,
+                         key="register_btn"):
+                if not all([reg_name, reg_email,
+                            reg_user, reg_pass, reg_pass2]):
                     st.error("Please fill in all fields.")
                 elif len(reg_pass) < 6:
-                    st.error("Password must be at least 6 characters.")
+                    st.error(
+                        "Password must be at least 6 characters."
+                    )
                 elif reg_pass != reg_pass2:
                     st.error("Passwords do not match.")
                 elif '@' not in reg_email:
-                    st.error("Please enter a valid email address.")
+                    st.error(
+                        "Please enter a valid email address."
+                    )
                 else:
-                    result = register_user(reg_name, reg_email, reg_user, reg_pass)
+                    result = register_user(
+                        reg_name, reg_email, reg_user, reg_pass
+                    )
                     if result['success']:
-                        st.success("Account created! Please sign in using the Sign In tab.")
+                        st.success(
+                            "Account created! "
+                            "Sign in using the Sign In tab."
+                        )
                     else:
                         st.error(result['error'])

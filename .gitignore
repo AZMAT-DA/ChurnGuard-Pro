@@ -1,4 +1,19 @@
+# Local Database & History Tracking
 users.db
 prediction_history.csv
+
+# Python standard clutter
 __pycache__/
 *.pyc
+.ipynb_checkpoints/
+
+# ML Project Specifics (Ignore massive datasets and saved models)
+*.csv
+*.xlsx
+*.pkl
+*.h5
+
+# Virtual environments
+.venv/
+env/
+venv/
